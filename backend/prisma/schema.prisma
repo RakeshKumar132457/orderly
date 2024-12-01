@@ -1,0 +1,101 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Contractor {
+  id         String      @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  phone      String      @unique
+  workOrders WorkOrder[]
+  bills      Bill[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@map("contractors")
+}
+
+model Entity {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String     @unique
+  locations Location[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("entities")
+}
+
+model Location {
+  id         String           @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  entity     Entity           @relation(fields: [entityId], references: [id])
+  entityId   String          @db.ObjectId
+  state      LocationState    @default(READY)
+  workOrders WorkOrderLocation[]
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([name, entityId])
+  @@map("locations")
+}
+
+model WorkOrder {
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  contractor   Contractor         @relation(fields: [contractorId], references: [id])
+  contractorId String            @db.ObjectId
+  paymentTerms Int
+  dueDate      DateTime
+  locations    WorkOrderLocation[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@map("workOrders")
+}
+
+model WorkOrderLocation {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id])
+  workOrderId String    @db.ObjectId
+  location    Location  @relation(fields: [locationId], references: [id])
+  locationId  String    @db.ObjectId
+  rate        Float
+  quantity    Float
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([workOrderId, locationId])
+  @@map("workOrderLocations")
+}
+
+model Bill {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  billNumber   String     @unique
+  contractor   Contractor @relation(fields: [contractorId], references: [id])
+  contractorId String     @db.ObjectId
+  locations    BillLocation[]
+  totalAmount  Float
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@map("bills")
+}
+
+model BillLocation {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  bill     Bill   @relation(fields: [billId], references: [id])
+  billId   String @db.ObjectId
+  name     String
+  rate     Float
+  quantity Float
+
+  @@map("billLocations")
+}
+
+enum LocationState {
+  READY
+  COMPLETED
+}
