@@ -1,4 +1,4 @@
-# Work Order Management System
+# Orderly
 
 A full-stack application for managing work orders, contractors, and billing using Angular, Node.js, and MongoDB.
 
