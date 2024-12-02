@@ -1,4 +1,4 @@
-# Orderly
+# Work Order Management System
 
 A full-stack application for managing work orders, contractors, and billing using Angular, Node.js, and MongoDB.
 
@@ -9,22 +9,30 @@ A full-stack application for managing work orders, contractors, and billing usin
 - Angular CLI (v19.0.0)
 - Git
 
-## MongoDB Setup
+## MongoDB ReplicaSet Setup
 
-1. Create data directory for MongoDB ReplicaSet:
+1. Edit the default MongoDB configuration file:
 ```bash
-mkdir -p ~/data/rs0
+sudo nano /etc/mongod.conf
 ```
 
-2. Start MongoDB with ReplicaSet:
-```bash
-mongod --replSet rs0 --dbpath ~/data/rs0
+2. Update the configuration to enable replication:
+```yaml
+# Update/add these settings in mongod.conf
+replication:
+   replSetName: "rs0"
 ```
 
-3. Initialize ReplicaSet:
+3. Restart MongoDB service:
+```bash
+sudo systemctl restart mongod
+```
+
+4. Initialize ReplicaSet:
 ```bash
 mongosh
 > rs.initiate()
+> rs.status()  # Verify replication status
 ```
 
 ## Project Setup
@@ -106,14 +114,48 @@ http://localhost:3000/docs
 | JWT_SECRET | JWT secret | this_is_jwt_super_secret |
 | JWT_EXPIRE | JWT expiration | 30d |
 
-## Common Issues
+## Features
 
-1. **MongoDB Connection**: Ensure ReplicaSet is running
-2. **Prisma**: Run `npx prisma generate` after schema changes
-3. **CORS**: Verify CORS_ORIGIN matches frontend URL
+- Contractor Management
+- Entity and Location Management
+- Work Order Creation and Tracking
+- Bill Generation
+- JWT Authentication
+- Swagger API Documentation
+- Logging System
+- Responsive UI with Tailwind CSS
+
+## Troubleshooting MongoDB ReplicaSet
+
+1. **Verify MongoDB Configuration**:
+```bash
+# Check MongoDB service status
+sudo systemctl status mongod
+
+# View MongoDB logs
+sudo tail -f /var/log/mongodb/mongod.log
+
+# Check current MongoDB configuration
+cat /etc/mongod.conf
+```
+
+2. **Common MongoDB Commands**:
+```bash
+# Check replication status
+rs.status()
+
+# Check configuration
+rs.conf()
+```
+
+3. **Permission Issues**:
+- Ensure MongoDB service has proper permissions
+- Check log file permissions if there are access issues
 
 ## Support
+
 Contact: Rakesh Kumar <rakesh.kumar.132457@gmail.com>
 
 ## License
+
 ISC
