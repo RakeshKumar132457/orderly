@@ -1,0 +1,33 @@
+<!-- src/app/shared/components/nav/nav.component.html -->
+<nav class="bg-gray-800 text-white">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center">
+        <span class="text-xl font-bold">Orderly</span>
+
+        <div class="ml-10 flex items-baseline space-x-4">
+          <ng-container *ngFor="let item of navItems">
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="bg-gray-900"
+              class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
+              [class.bg-gray-900]="item.path === currentPath"
+            >
+              {{ item.label }}
+            </a>
+          </ng-container>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-4">
+        <span class="text-sm" *ngIf="currentUser">{{ currentUser.name }}</span>
+        <button
+          (click)="logout()"
+          class="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-700"
+        >
+          Logout
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>

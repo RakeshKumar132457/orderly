@@ -1,0 +1,134 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Locations</h1>
+    <button 
+      (click)="openCreateDialog()"
+      class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+      Add Location
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-4">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+    {{ error }}
+  </div>
+
+  <!-- Data Table -->
+  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entity</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <tr *ngFor="let location of locations">
+          <td class="px-6 py-4 whitespace-nowrap">{{ location.name }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ location.entity.name }}</td>
+          <td class="px-6 py-4 whitespace-nowrap">
+            <span 
+              class="px-2 py-1 text-xs font-semibold rounded-full"
+              [ngClass]="{
+                'bg-yellow-100 text-yellow-800': location.state === 'READY',
+                'bg-green-100 text-green-800': location.state === 'COMPLETED'
+              }">
+              {{ location.state }}
+            </span>
+          </td>
+          <td class="px-6 py-4 whitespace-nowrap">{{ location.createdAt | date }}</td>
+          <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+            <button 
+              *ngIf="location.state === 'READY'"
+              (click)="markAsComplete(location)"
+              class="text-green-600 hover:text-green-900">
+              Complete
+            </button>
+            <button 
+              (click)="openEditDialog(location)"
+              class="text-blue-600 hover:text-blue-900">
+              Edit
+            </button>
+            <button 
+              (click)="deleteLocation(location.id)"
+              class="text-red-600 hover:text-red-900">
+              Delete
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="locations.length === 0 && !isLoading">
+          <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+            No locations found
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal/Dialog for Create/Edit -->
+<div *ngIf="showDialog" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+  <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md relative">
+    <h2 class="text-xl font-bold mb-4">{{ selectedLocation ? 'Edit' : 'Add' }} Location</h2>
+    
+    <form [formGroup]="locationForm" (ngSubmit)="onSubmit()">
+      <div class="mb-4">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
+          Name
+        </label>
+        <input
+          type="text"
+          id="name"
+          formControlName="name"
+          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter location name">
+        <div *ngIf="locationForm.get('name')?.touched && locationForm.get('name')?.errors?.['required']" 
+             class="text-red-500 text-sm mt-1">
+          Name is required
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <label class="block text-gray-700 text-sm font-bold mb-2" for="entityId">
+          Entity
+        </label>
+        <select
+          id="entityId"
+          formControlName="entityId"
+          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">Select an entity</option>
+          <option *ngFor="let entity of entities" [value]="entity.id">
+            {{ entity.name }}
+          </option>
+        </select>
+        <div *ngIf="locationForm.get('entityId')?.touched && locationForm.get('entityId')?.errors?.['required']" 
+             class="text-red-500 text-sm mt-1">
+          Entity is required
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button
+          type="button"
+          (click)="closeDialog()"
+          class="px-4 py-2 text-gray-600 bg-gray-200 rounded hover:bg-gray-300">
+          Cancel
+        </button>
+        <button
+          type="submit"
+          [disabled]="locationForm.invalid || isSubmitting"
+          class="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600 disabled:opacity-50">
+          {{ isSubmitting ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

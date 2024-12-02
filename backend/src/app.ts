@@ -1,4 +1,5 @@
 import express from "express";
+import cors from 'cors';
 import { env } from "./config/env";
 import { v1Router } from "./routes/v1";
 import { errorHandler } from "./shared/middlewares/error.middleware";
@@ -7,6 +8,7 @@ import { setupSwagger } from "./config/swagger";
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(loggerMiddleware);
